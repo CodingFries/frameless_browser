@@ -64,6 +64,9 @@ class _BrowserTopBarState extends State<BrowserTopBar>
   /// Tracks whether the top bar is currently expanded to show all controls.
   bool isExpanded = false;
 
+  /// Tracks whether the user is hovering over the collapsed button area.
+  bool isHoveringCollapsedButton = false;
+
   /// Controller for the URL input field.
   final TextEditingController _urlController = TextEditingController();
 
@@ -172,6 +175,10 @@ class _BrowserTopBarState extends State<BrowserTopBar>
   void _toggleExpanded() {
     setState(() {
       isExpanded = !isExpanded;
+      // Reset hover state when collapsing to ensure button fades away
+      if (!isExpanded) {
+        isHoveringCollapsedButton = false;
+      }
     });
 
     if (isExpanded) {
@@ -212,28 +219,50 @@ class _BrowserTopBarState extends State<BrowserTopBar>
       right: MediaQuery.of(context).size.width * 0.3,
       child: Align(
         alignment: Alignment.topCenter,
-        child: Container(
-          width: 50,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-          ),
-          child: DragToMoveArea(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: _toggleExpanded,
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                  tooltip: 'Show browser controls',
-                  iconSize: 24,
-                  color: Colors.white,
+        child: MouseRegion(
+          onEnter: (_) {
+            setState(() {
+              isHoveringCollapsedButton = true;
+            });
+          },
+          onExit: (_) {
+            setState(() {
+              isHoveringCollapsedButton = false;
+            });
+          },
+          child: Container(
+            width: 50,
+            height: 40,
+            // Transparent container to ensure hover detection works
+            color: Colors.transparent,
+            child: AnimatedOpacity(
+              opacity: isHoveringCollapsedButton ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Container(
+                width: 50,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
                 ),
-              ],
+                child: DragToMoveArea(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: _toggleExpanded,
+                        icon: const Icon(Icons.keyboard_arrow_down),
+                        tooltip: 'Show browser controls',
+                        iconSize: 24,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
