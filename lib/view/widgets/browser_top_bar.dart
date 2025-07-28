@@ -216,7 +216,7 @@ class _BrowserTopBarState extends State<BrowserTopBar>
   /// Builds the collapsed state showing only a down button at 70% width.
   Widget _buildCollapsedButton() {
     return Positioned(
-      right: MediaQuery.of(context).size.width * 0.3,
+      right: MediaQuery.of(context).size.width * 0.2,
       child: Align(
         alignment: Alignment.topCenter,
         child: MouseRegion(
@@ -231,35 +231,37 @@ class _BrowserTopBarState extends State<BrowserTopBar>
             });
           },
           child: Container(
-            width: 50,
+            width: 400,
             height: 40,
             // Transparent container to ensure hover detection works
             color: Colors.transparent,
             child: AnimatedOpacity(
               opacity: isHoveringCollapsedButton ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 200),
-              child: Container(
-                width: 50,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
+              child: Center(
+                child: Container(
+                  width: 50,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
                   ),
-                ),
-                child: DragToMoveArea(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: _toggleExpanded,
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        tooltip: 'Show browser controls',
-                        iconSize: 24,
-                        color: Colors.white,
-                      ),
-                    ],
+                  child: DragToMoveArea(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: _toggleExpanded,
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          tooltip: 'Show browser controls',
+                          iconSize: 24,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
