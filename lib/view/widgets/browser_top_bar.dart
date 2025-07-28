@@ -58,10 +58,10 @@ class BrowserTopBar extends StatefulWidget {
   State<BrowserTopBar> createState() => _BrowserTopBarState();
 }
 
-/// State class for the BrowserTopBar widget managing hover animations and browser interactions.
+/// State class for the BrowserTopBar widget managing bar expansion and browser interactions.
 class _BrowserTopBarState extends State<BrowserTopBar> {
-  /// Tracks whether the user is currently hovering over the top area.
-  bool isHoveringTop = false;
+  /// Tracks whether the top bar is currently expanded to show all controls.
+  bool isExpanded = false;
   
   /// Controller for the URL input field.
   final TextEditingController _urlController = TextEditingController();
@@ -144,181 +144,225 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
     );
   }
 
+  /// Toggles the expanded state of the top bar.
+  void _toggleExpanded() {
+    setState(() {
+      isExpanded = !isExpanded;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    return isExpanded ? _buildExpandedBar() : _buildCollapsedButton();
+  }
+
+  /// Builds the collapsed state showing only a down button at 70% width.
+  Widget _buildCollapsedButton() {
+    return Positioned(
+      top: 0,
+      right: MediaQuery.of(context).size.width * 0.3,
+      child: Container(
+        height: 40,
+        width: 50,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8),
+          ),
+        ),
+        child: DragToMoveArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: _toggleExpanded,
+                icon: const Icon(Icons.keyboard_arrow_down),
+                tooltip: 'Show browser controls',
+                iconSize: 24,
+                color: Colors.white,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the expanded state showing the full browser bar.
+  Widget _buildExpandedBar() {
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
-      child: MouseRegion(
-          onEnter: (_) => setState(() => isHoveringTop = true),
-          onExit: (_) => setState(() => isHoveringTop = false),
-          child: AnimatedOpacity(
-            opacity: isHoveringTop ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.black,
-              ),
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.black,
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: 8), // Left padding
+
+            // Browser navigation controls
+            DragToMoveArea(
               child: Row(
                 children: [
-                  SizedBox(width: 8), // Left padding
-
-                  // Browser navigation controls
-                  DragToMoveArea(
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: _goBack,
-                          icon: const Icon(Icons.arrow_back),
-                          tooltip: 'Back',
-                          iconSize: 20,
-                        ),
-                        IconButton(
-                          onPressed: _goForward,
-                          icon: const Icon(Icons.arrow_forward),
-                          tooltip: 'Forward',
-                          iconSize: 20,
-                        ),
-                        IconButton(
-                          onPressed: _refresh,
-                          icon: const Icon(Icons.refresh),
-                          tooltip: 'Refresh',
-                          iconSize: 20,
-                        ),
-                        IconButton(
-                          onPressed: _goHome,
-                          icon: const Icon(Icons.home),
-                          tooltip: 'Home',
-                          iconSize: 20,
-                        ),
-
-                        // Separator
-                        Container(
-                          height: 20,
-                          width: 1,
-                          color: Colors.white.withAlpha(77),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                        ),
-                      ],
-                    ),
+                  IconButton(
+                    onPressed: _goBack,
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: 'Back',
+                    iconSize: 20,
                   ),
-
-
-                  // URL input field
-                  Expanded(
-                    child: Container(
-                      height: 40,
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black38,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withAlpha(51),
-                          width: 1,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _urlController,
-                        focusNode: _urlFocusNode,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Enter URL or search...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withAlpha(128),
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: _navigateToUrl,
-                            icon: const Icon(
-                              Icons.search,
-                              size: 18,
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ),
-                        onSubmitted: (_) => _navigateToUrl(),
-                      ),
-                    ),
+                  IconButton(
+                    onPressed: _goForward,
+                    icon: const Icon(Icons.arrow_forward),
+                    tooltip: 'Forward',
+                    iconSize: 20,
+                  ),
+                  IconButton(
+                    onPressed: _refresh,
+                    icon: const Icon(Icons.refresh),
+                    tooltip: 'Refresh',
+                    iconSize: 20,
+                  ),
+                  IconButton(
+                    onPressed: _goHome,
+                    icon: const Icon(Icons.home),
+                    tooltip: 'Home',
+                    iconSize: 20,
                   ),
 
                   // Separator
-                  DragToMoveArea(
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 20,
-                          width: 1,
-                          color: Colors.white.withAlpha(77),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                        ),
-
-                        // Settings button
-                        IconButton(
-                          onPressed: () async {
-                            await context.push(AppRoutes.settings);
-                            if (widget.onSettingsChanged != null) {
-                              widget.onSettingsChanged!();
-                            }
-                          },
-                          icon: const Icon(Icons.settings),
-                          tooltip: 'Settings',
-                          iconSize: 20,
-                        ),
-
-                        // Separator
-                        Container(
-                          height: 20,
-                          width: 1,
-                          color: Colors.white.withAlpha(77),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                        ),
-
-                        // Window controls
-                        IconButton(
-                          onPressed: () {
-                            windowManager.minimize();
-                          },
-                          icon: const Icon(Icons.minimize),
-                          iconSize: 20,
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            if (await windowManager.isMaximized()) {
-                              windowManager.unmaximize();
-                            } else {
-                              windowManager.maximize();
-                            }
-                          },
-                          icon: const Icon(Icons.crop_square),
-                          iconSize: 20,
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            windowManager.close();
-                          },
-                          icon: const Icon(Icons.close),
-                          iconSize: 20,
-                        ),
-                      ],
-                    ),
+                  Container(
+                    height: 20,
+                    width: 1,
+                    color: Colors.white.withAlpha(77),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
                   ),
-
-                  SizedBox(width: 8), // Right padding
                 ],
               ),
             ),
-          ),
+
+            // URL input field
+            Expanded(
+              child: Container(
+                height: 40,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black38,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withAlpha(51),
+                    width: 1,
+                  ),
+                ),
+                child: TextField(
+                  controller: _urlController,
+                  focusNode: _urlFocusNode,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Enter URL or search...',
+                    hintStyle: TextStyle(
+                      color: Colors.white.withAlpha(128),
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: _navigateToUrl,
+                      icon: const Icon(
+                        Icons.search,
+                        size: 18,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                  onSubmitted: (_) => _navigateToUrl(),
+                ),
+              ),
+            ),
+
+            // Separator and controls
+            DragToMoveArea(
+              child: Row(
+                children: [
+                  Container(
+                    height: 20,
+                    width: 1,
+                    color: Colors.white.withAlpha(77),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                  ),
+
+                  // Collapse button
+                  IconButton(
+                    onPressed: _toggleExpanded,
+                    icon: const Icon(Icons.keyboard_arrow_up),
+                    tooltip: 'Hide browser controls',
+                    iconSize: 20,
+                  ),
+
+                  // Settings button
+                  IconButton(
+                    onPressed: () async {
+                      await context.push(AppRoutes.settings);
+                      if (widget.onSettingsChanged != null) {
+                        widget.onSettingsChanged!();
+                      }
+                    },
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Settings',
+                    iconSize: 20,
+                  ),
+
+                  // Separator
+                  Container(
+                    height: 20,
+                    width: 1,
+                    color: Colors.white.withAlpha(77),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                  ),
+
+                  // Window controls
+                  IconButton(
+                    onPressed: () {
+                      windowManager.minimize();
+                    },
+                    icon: const Icon(Icons.minimize),
+                    iconSize: 20,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      if (await windowManager.isMaximized()) {
+                        windowManager.unmaximize();
+                      } else {
+                        windowManager.maximize();
+                      }
+                    },
+                    icon: const Icon(Icons.crop_square),
+                    iconSize: 20,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      windowManager.close();
+                    },
+                    icon: const Icon(Icons.close),
+                    iconSize: 20,
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: 8), // Right padding
+          ],
         ),
+      ),
     );
   }
 }
