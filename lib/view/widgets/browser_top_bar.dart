@@ -158,160 +158,168 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
       child: MouseRegion(
           onEnter: (_) => setState(() => isHoveringTop = true),
           onExit: (_) => setState(() => isHoveringTop = false),
-          child: DragToMoveArea(
-            child: AnimatedOpacity(
-              opacity: isHoveringTop ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 200),
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                ),
-                child: Row(
-                  children: [
-                    // Browser navigation controls
-                    IconButton(
-                      onPressed: _goBack,
-                      icon: const Icon(Icons.arrow_back),
-                      tooltip: 'Back',
-                      iconSize: 20,
-                    ),
-                    IconButton(
-                      onPressed: _goForward,
-                      icon: const Icon(Icons.arrow_forward),
-                      tooltip: 'Forward',
-                      iconSize: 20,
-                    ),
-                    IconButton(
-                      onPressed: _refresh,
-                      icon: const Icon(Icons.refresh),
-                      tooltip: 'Refresh',
-                      iconSize: 20,
-                    ),
-                    IconButton(
-                      onPressed: _goHome,
-                      icon: const Icon(Icons.home),
-                      tooltip: 'Home',
-                      iconSize: 20,
-                    ),
+          child: AnimatedOpacity(
+            opacity: isHoveringTop ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.black,
+              ),
+              child: Row(
+                children: [
+                  SizedBox(width: 8), // Left padding
 
-                    // Separator
-                    Container(
-                      height: 20,
-                      width: 1,
-                      color: Colors.white.withAlpha(77),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                    ),
-
-                    // URL input field
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.black38,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.white.withAlpha(51),
-                            width: 1,
-                          ),
+                  // Browser navigation controls
+                  DragToMoveArea(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: _goBack,
+                          icon: const Icon(Icons.arrow_back),
+                          tooltip: 'Back',
+                          iconSize: 20,
                         ),
-                        child: TextField(
-                          controller: _urlController,
-                          focusNode: _urlFocusNode,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Enter URL or search...',
-                            hintStyle: TextStyle(
-                              color: Colors.white.withAlpha(128),
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            suffixIcon: IconButton(
-                              onPressed: _navigateToUrl,
-                              icon: const Icon(
-                                Icons.search,
-                                size: 18,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          ),
-                          onSubmitted: (_) => _navigateToUrl(),
-                          onTap: () {
-                            // Select all text when tapping the URL field
-                            _urlController.selection = TextSelection(
-                              baseOffset: 0,
-                              extentOffset: _urlController.text.length,
-                            );
-                          },
+                        IconButton(
+                          onPressed: _goForward,
+                          icon: const Icon(Icons.arrow_forward),
+                          tooltip: 'Forward',
+                          iconSize: 20,
+                        ),
+                        IconButton(
+                          onPressed: _refresh,
+                          icon: const Icon(Icons.refresh),
+                          tooltip: 'Refresh',
+                          iconSize: 20,
+                        ),
+                        IconButton(
+                          onPressed: _goHome,
+                          icon: const Icon(Icons.home),
+                          tooltip: 'Home',
+                          iconSize: 20,
+                        ),
+
+                        // Separator
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.white.withAlpha(77),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
+                      ],
+                    ),
+                  ),
+
+
+                  // URL input field
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.black38,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withAlpha(51),
+                          width: 1,
                         ),
                       ),
+                      child: TextField(
+                        controller: _urlController,
+                        focusNode: _urlFocusNode,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Enter URL or search...',
+                          hintStyle: TextStyle(
+                            color: Colors.white.withAlpha(128),
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: _navigateToUrl,
+                            icon: const Icon(
+                              Icons.search,
+                              size: 18,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                        onSubmitted: (_) => _navigateToUrl(),
+                      ),
                     ),
+                  ),
 
-                    // Separator
-                    Container(
-                      height: 20,
-                      width: 1,
-                      color: Colors.white.withAlpha(77),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                    ),
+                  // Separator
+                  DragToMoveArea(
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.white.withAlpha(77),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
 
-                    // Settings button
-                    IconButton(
-                      onPressed: () async {
-                        await context.push(AppRoutes.settings);
-                        if (widget.onSettingsChanged != null) {
-                          widget.onSettingsChanged!();
-                        }
-                      },
-                      icon: const Icon(Icons.settings),
-                      tooltip: 'Settings',
-                      iconSize: 20,
-                    ),
+                        // Settings button
+                        IconButton(
+                          onPressed: () async {
+                            await context.push(AppRoutes.settings);
+                            if (widget.onSettingsChanged != null) {
+                              widget.onSettingsChanged!();
+                            }
+                          },
+                          icon: const Icon(Icons.settings),
+                          tooltip: 'Settings',
+                          iconSize: 20,
+                        ),
 
-                    // Separator
-                    Container(
-                      height: 20,
-                      width: 1,
-                      color: Colors.white.withAlpha(77),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                    ),
+                        // Separator
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.white.withAlpha(77),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
 
-                    // Window controls
-                    IconButton(
-                      onPressed: () {
-                        windowManager.minimize();
-                      },
-                      icon: const Icon(Icons.minimize),
-                      iconSize: 20,
+                        // Window controls
+                        IconButton(
+                          onPressed: () {
+                            windowManager.minimize();
+                          },
+                          icon: const Icon(Icons.minimize),
+                          iconSize: 20,
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            if (await windowManager.isMaximized()) {
+                              windowManager.unmaximize();
+                            } else {
+                              windowManager.maximize();
+                            }
+                          },
+                          icon: const Icon(Icons.crop_square),
+                          iconSize: 20,
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            windowManager.close();
+                          },
+                          icon: const Icon(Icons.close),
+                          iconSize: 20,
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      onPressed: () async {
-                        if (await windowManager.isMaximized()) {
-                          windowManager.unmaximize();
-                        } else {
-                          windowManager.maximize();
-                        }
-                      },
-                      icon: const Icon(Icons.crop_square),
-                      iconSize: 20,
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        windowManager.close();
-                      },
-                      icon: const Icon(Icons.close),
-                      iconSize: 20,
-                    ),
-                  ],
-                ),
+                  ),
+
+                  SizedBox(width: 8), // Right padding
+                ],
               ),
             ),
           ),
