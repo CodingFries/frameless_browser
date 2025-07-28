@@ -67,7 +67,6 @@ Future main() async {
   // Configure window options for frameless, transparent window
   WindowOptions windowOptions = WindowOptions(
     size: const Size(K.defaultWindowWidth, K.defaultWindowHeight),
-    minimumSize: const Size(K.minWindowWidth, K.minWindowHeight),
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,

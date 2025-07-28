@@ -48,23 +48,11 @@ class K {
   ///
   /// This defines the initial width of the application window when
   /// first launched, providing a reasonable default size for most users.
-  static const double defaultWindowWidth = 1200.0;
+  static const double defaultWindowWidth = 1920.0;
 
   /// Default window height in pixels.
   ///
   /// This defines the initial height of the application window when
   /// first launched, providing a reasonable default size for most users.
-  static const double defaultWindowHeight = 800.0;
-
-  /// Minimum window width in pixels.
-  ///
-  /// This prevents the window from being resized below a certain width
-  /// to ensure the user interface remains usable and readable.
-  static const double minWindowWidth = 800.0;
-
-  /// Minimum window height in pixels.
-  ///
-  /// This prevents the window from being resized below a certain height
-  /// to ensure the user interface remains usable and readable.
-  static const double minWindowHeight = 600.0;
+  static const double defaultWindowHeight = 1080.0;
 }
