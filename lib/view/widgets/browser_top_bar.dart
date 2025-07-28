@@ -155,43 +155,19 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
       top: 0,
       left: 0,
       right: 0,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left drag area (reduced to make room for browser controls)
-          Expanded(
-            flex: 2,
-            child: MouseRegion(
-              onEnter: (_) => setState(() => isHoveringTop = true),
-              onExit: (_) => setState(() => isHoveringTop = false),
-              child: DragToMoveArea(
-                child: IgnorePointer(
-                  child: AnimatedContainer(
-                    height: 40,
-                    duration: const Duration(milliseconds: 200),
-                    color: isHoveringTop ? Colors.black26 : Colors.transparent,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          
-          // Main browser controls area
-          MouseRegion(
-            onEnter: (_) => setState(() => isHoveringTop = true),
-            onExit: (_) => setState(() => isHoveringTop = false),
+      child: MouseRegion(
+          onEnter: (_) => setState(() => isHoveringTop = true),
+          onExit: (_) => setState(() => isHoveringTop = false),
+          child: DragToMoveArea(
             child: AnimatedOpacity(
               opacity: isHoveringTop ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 200),
               child: Container(
+                height: 50,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(8),
-                  ),
-                  color: Colors.black26,
+                  color: Colors.black,
                 ),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Browser navigation controls
                     IconButton(
@@ -218,7 +194,7 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
                       tooltip: 'Home',
                       iconSize: 20,
                     ),
-                    
+
                     // Separator
                     Container(
                       height: 20,
@@ -226,58 +202,59 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
                       color: Colors.white.withAlpha(77),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                     ),
-                    
+
                     // URL input field
-                    Container(
-                      width: 400,
-                      height: 32,
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black38,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withAlpha(51),
-                          width: 1,
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withAlpha(51),
+                            width: 1,
+                          ),
                         ),
-                      ),
-                      child: TextField(
-                        controller: _urlController,
-                        focusNode: _urlFocusNode,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Enter URL or search...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withAlpha(128),
+                        child: TextField(
+                          controller: _urlController,
+                          focusNode: _urlFocusNode,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 14,
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: _navigateToUrl,
-                            icon: const Icon(
-                              Icons.search,
-                              size: 18,
-                              color: Colors.white70,
+                          decoration: InputDecoration(
+                            hintText: 'Enter URL or search...',
+                            hintStyle: TextStyle(
+                              color: Colors.white.withAlpha(128),
+                              fontSize: 14,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: _navigateToUrl,
+                              icon: const Icon(
+                                Icons.search,
+                                size: 18,
+                                color: Colors.white70,
+                              ),
                             ),
                           ),
+                          onSubmitted: (_) => _navigateToUrl(),
+                          onTap: () {
+                            // Select all text when tapping the URL field
+                            _urlController.selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: _urlController.text.length,
+                            );
+                          },
                         ),
-                        onSubmitted: (_) => _navigateToUrl(),
-                        onTap: () {
-                          // Select all text when tapping the URL field
-                          _urlController.selection = TextSelection(
-                            baseOffset: 0,
-                            extentOffset: _urlController.text.length,
-                          );
-                        },
                       ),
                     ),
-                    
+
                     // Separator
                     Container(
                       height: 20,
@@ -285,7 +262,7 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
                       color: Colors.white.withAlpha(77),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                     ),
-                    
+
                     // Settings button
                     IconButton(
                       onPressed: () async {
@@ -298,7 +275,7 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
                       tooltip: 'Settings',
                       iconSize: 20,
                     ),
-                    
+
                     // Separator
                     Container(
                       height: 20,
@@ -306,7 +283,7 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
                       color: Colors.white.withAlpha(77),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                     ),
-                    
+
                     // Window controls
                     IconButton(
                       onPressed: () {
@@ -338,26 +315,7 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
               ),
             ),
           ),
-          
-          // Right drag area (reduced)
-          Expanded(
-            flex: 1,
-            child: MouseRegion(
-              onEnter: (_) => setState(() => isHoveringTop = true),
-              onExit: (_) => setState(() => isHoveringTop = false),
-              child: DragToMoveArea(
-                child: IgnorePointer(
-                  child: AnimatedContainer(
-                    height: 40,
-                    duration: const Duration(milliseconds: 200),
-                    color: isHoveringTop ? Colors.black26 : Colors.transparent,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
     );
   }
 }
