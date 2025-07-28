@@ -68,9 +68,6 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
   
   /// Focus node for the URL input field.
   final FocusNode _urlFocusNode = FocusNode();
-  
-  /// Current page URL for display in the URL bar.
-  String _currentUrl = '';
 
   @override
   void initState() {
@@ -89,7 +86,6 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
   void _loadHomepageUrl() {
     final homepageUrl = SettingsStorage.getHomepageUrl();
     setState(() {
-      _currentUrl = homepageUrl;
       _urlController.text = homepageUrl;
     });
   }
@@ -97,7 +93,6 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
   /// Updates the current URL display.
   void updateCurrentUrl(String url) {
     setState(() {
-      _currentUrl = url;
       if (!_urlFocusNode.hasFocus) {
         _urlController.text = url;
       }
