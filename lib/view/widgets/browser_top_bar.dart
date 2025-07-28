@@ -1,6 +1,6 @@
 // Enhanced browser top bar with URL entry and navigation controls.
 //
-// This widget provides a comprehensive browser control bar that appears as an 
+// This widget provides a comprehensive browser control bar that appears as an
 // overlay at the top of the window. It includes:
 // - Browser navigation controls (back, forward, refresh, home)
 // - URL entry field for direct navigation
@@ -39,7 +39,7 @@ import '../routing/app_routes.dart';
 class BrowserTopBar extends StatefulWidget {
   /// WebView controller for browser navigation operations.
   final InAppWebViewController? webViewController;
-  
+
   /// Optional callback function triggered when returning from settings.
   final VoidCallback? onSettingsChanged;
 
@@ -49,7 +49,7 @@ class BrowserTopBar extends StatefulWidget {
   ///   [webViewController] - Controller for WebView navigation operations
   ///   [onSettingsChanged] - Callback triggered when returning from settings
   const BrowserTopBar({
-    super.key, 
+    super.key,
     this.webViewController,
     this.onSettingsChanged,
   });
@@ -59,26 +59,52 @@ class BrowserTopBar extends StatefulWidget {
 }
 
 /// State class for the BrowserTopBar widget managing bar expansion and browser interactions.
-class _BrowserTopBarState extends State<BrowserTopBar> {
+class _BrowserTopBarState extends State<BrowserTopBar>
+    with TickerProviderStateMixin {
   /// Tracks whether the top bar is currently expanded to show all controls.
   bool isExpanded = false;
-  
+
   /// Controller for the URL input field.
   final TextEditingController _urlController = TextEditingController();
-  
+
   /// Focus node for the URL input field.
   final FocusNode _urlFocusNode = FocusNode();
+
+  /// Animation controller for the slide animation.
+  late AnimationController _animationController;
+
+  /// Animation for the slide transition.
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadHomepageUrl();
+
+    // Initialize animation controller
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    // Initialize slide animation (starts from top, slides down)
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0.0, -1.0), // Start above the screen
+          end: const Offset(0.0, 0.0), // End at normal position
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
   }
 
   @override
   void dispose() {
     _urlController.dispose();
     _urlFocusNode.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -115,9 +141,7 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
       }
     }
 
-    widget.webViewController?.loadUrl(
-      urlRequest: URLRequest(url: WebUri(url)),
-    );
+    widget.webViewController?.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
     _urlFocusNode.unfocus();
   }
 
@@ -149,40 +173,68 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
     setState(() {
       isExpanded = !isExpanded;
     });
+
+    if (isExpanded) {
+      // Animate the bar sliding down
+      _animationController.forward();
+    } else {
+      // Animate the bar sliding up
+      _animationController.reverse();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return isExpanded ? _buildExpandedBar() : _buildCollapsedButton();
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            // Show collapsed button when not expanded and animation is not running
+            if (!isExpanded && _animationController.value == 0.0)
+              _buildCollapsedButton(),
+
+            // Show animated expanded bar during animation or when expanded
+            if (isExpanded || _animationController.value > 0.0)
+              SlideTransition(
+                position: _slideAnimation,
+                child: _buildExpandedBar(),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   /// Builds the collapsed state showing only a down button at 70% width.
   Widget _buildCollapsedButton() {
     return Positioned(
-      top: 0,
       right: MediaQuery.of(context).size.width * 0.3,
-      child: Container(
-        height: 40,
-        width: 50,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(8),
-            bottomRight: Radius.circular(8),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          width: 50,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
+            ),
           ),
-        ),
-        child: DragToMoveArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: _toggleExpanded,
-                icon: const Icon(Icons.keyboard_arrow_down),
-                tooltip: 'Show browser controls',
-                iconSize: 24,
-                color: Colors.white,
-              ),
-            ],
+          child: DragToMoveArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: _toggleExpanded,
+                  icon: const Icon(Icons.keyboard_arrow_down),
+                  tooltip: 'Show browser controls',
+                  iconSize: 24,
+                  color: Colors.white,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -191,177 +243,164 @@ class _BrowserTopBarState extends State<BrowserTopBar> {
 
   /// Builds the expanded state showing the full browser bar.
   Widget _buildExpandedBar() {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.black,
-        ),
-        child: Row(
-          children: [
-            SizedBox(width: 8), // Left padding
-
-            // Browser navigation controls
-            DragToMoveArea(
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: _goBack,
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'Back',
-                    iconSize: 20,
-                  ),
-                  IconButton(
-                    onPressed: _goForward,
-                    icon: const Icon(Icons.arrow_forward),
-                    tooltip: 'Forward',
-                    iconSize: 20,
-                  ),
-                  IconButton(
-                    onPressed: _refresh,
-                    icon: const Icon(Icons.refresh),
-                    tooltip: 'Refresh',
-                    iconSize: 20,
-                  ),
-                  IconButton(
-                    onPressed: _goHome,
-                    icon: const Icon(Icons.home),
-                    tooltip: 'Home',
-                    iconSize: 20,
-                  ),
-
-                  // Separator
-                  Container(
-                    height: 20,
-                    width: 1,
-                    color: Colors.white.withAlpha(77),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                  ),
-                ],
-              ),
-            ),
-
-            // URL input field
-            Expanded(
-              child: Container(
-                height: 40,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withAlpha(51),
-                    width: 1,
-                  ),
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(color: Colors.black),
+      child: Row(
+        children: [
+          SizedBox(width: 8), // Left padding
+          // Browser navigation controls
+          DragToMoveArea(
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: _goBack,
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: 'Back',
+                  iconSize: 20,
                 ),
-                child: TextField(
-                  controller: _urlController,
-                  focusNode: _urlFocusNode,
-                  style: const TextStyle(
-                    color: Colors.white,
+                IconButton(
+                  onPressed: _goForward,
+                  icon: const Icon(Icons.arrow_forward),
+                  tooltip: 'Forward',
+                  iconSize: 20,
+                ),
+                IconButton(
+                  onPressed: _refresh,
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Refresh',
+                  iconSize: 20,
+                ),
+                IconButton(
+                  onPressed: _goHome,
+                  icon: const Icon(Icons.home),
+                  tooltip: 'Home',
+                  iconSize: 20,
+                ),
+
+                // Separator
+                Container(
+                  height: 20,
+                  width: 1,
+                  color: Colors.white.withAlpha(77),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                ),
+              ],
+            ),
+          ),
+
+          // URL input field
+          Expanded(
+            child: Container(
+              height: 40,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: Colors.black38,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withAlpha(51), width: 1),
+              ),
+              child: TextField(
+                controller: _urlController,
+                focusNode: _urlFocusNode,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Enter URL or search...',
+                  hintStyle: TextStyle(
+                    color: Colors.white.withAlpha(128),
                     fontSize: 14,
                   ),
-                  decoration: InputDecoration(
-                    hintText: 'Enter URL or search...',
-                    hintStyle: TextStyle(
-                      color: Colors.white.withAlpha(128),
-                      fontSize: 14,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: _navigateToUrl,
-                      icon: const Icon(
-                        Icons.search,
-                        size: 18,
-                        color: Colors.white70,
-                      ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: _navigateToUrl,
+                    icon: const Icon(
+                      Icons.search,
+                      size: 18,
+                      color: Colors.white70,
                     ),
                   ),
-                  onSubmitted: (_) => _navigateToUrl(),
                 ),
+                onSubmitted: (_) => _navigateToUrl(),
               ),
             ),
+          ),
 
-            // Separator and controls
-            DragToMoveArea(
-              child: Row(
-                children: [
-                  Container(
-                    height: 20,
-                    width: 1,
-                    color: Colors.white.withAlpha(77),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                  ),
+          // Separator and controls
+          DragToMoveArea(
+            child: Row(
+              children: [
+                Container(
+                  height: 20,
+                  width: 1,
+                  color: Colors.white.withAlpha(77),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                ),
 
-                  // Collapse button
-                  IconButton(
-                    onPressed: _toggleExpanded,
-                    icon: const Icon(Icons.keyboard_arrow_up),
-                    tooltip: 'Hide browser controls',
-                    iconSize: 20,
-                  ),
+                // Collapse button
+                IconButton(
+                  onPressed: _toggleExpanded,
+                  icon: const Icon(Icons.keyboard_arrow_up),
+                  tooltip: 'Hide browser controls',
+                  iconSize: 20,
+                ),
 
-                  // Settings button
-                  IconButton(
-                    onPressed: () async {
-                      await context.push(AppRoutes.settings);
-                      if (widget.onSettingsChanged != null) {
-                        widget.onSettingsChanged!();
-                      }
-                    },
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Settings',
-                    iconSize: 20,
-                  ),
+                // Settings button
+                IconButton(
+                  onPressed: () async {
+                    await context.push(AppRoutes.settings);
+                    if (widget.onSettingsChanged != null) {
+                      widget.onSettingsChanged!();
+                    }
+                  },
+                  icon: const Icon(Icons.settings),
+                  tooltip: 'Settings',
+                  iconSize: 20,
+                ),
 
-                  // Separator
-                  Container(
-                    height: 20,
-                    width: 1,
-                    color: Colors.white.withAlpha(77),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                  ),
+                // Separator
+                Container(
+                  height: 20,
+                  width: 1,
+                  color: Colors.white.withAlpha(77),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                ),
 
-                  // Window controls
-                  IconButton(
-                    onPressed: () {
-                      windowManager.minimize();
-                    },
-                    icon: const Icon(Icons.minimize),
-                    iconSize: 20,
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      if (await windowManager.isMaximized()) {
-                        windowManager.unmaximize();
-                      } else {
-                        windowManager.maximize();
-                      }
-                    },
-                    icon: const Icon(Icons.crop_square),
-                    iconSize: 20,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      windowManager.close();
-                    },
-                    icon: const Icon(Icons.close),
-                    iconSize: 20,
-                  ),
-                ],
-              ),
+                // Window controls
+                IconButton(
+                  onPressed: () {
+                    windowManager.minimize();
+                  },
+                  icon: const Icon(Icons.minimize),
+                  iconSize: 20,
+                ),
+                IconButton(
+                  onPressed: () async {
+                    if (await windowManager.isMaximized()) {
+                      windowManager.unmaximize();
+                    } else {
+                      windowManager.maximize();
+                    }
+                  },
+                  icon: const Icon(Icons.crop_square),
+                  iconSize: 20,
+                ),
+                IconButton(
+                  onPressed: () {
+                    windowManager.close();
+                  },
+                  icon: const Icon(Icons.close),
+                  iconSize: 20,
+                ),
+              ],
             ),
+          ),
 
-            SizedBox(width: 8), // Right padding
-          ],
-        ),
+          SizedBox(width: 8), // Right padding
+        ],
       ),
     );
   }
