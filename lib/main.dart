@@ -32,7 +32,7 @@ import 'view/routing/app_routes.dart';
 /// 5. Launches the main application widget
 ///
 /// Throws an assertion error if WebView2 Runtime is not available.
-Future main() async {
+void main() async {
   // Ensure Flutter framework is properly initialized
   WidgetsFlutterBinding.ensureInitialized();
 
