@@ -4,7 +4,15 @@ A modern, minimalist desktop web browser built with Flutter that features a fram
 
 ## Overview
 
-Frameless Browser is a lightweight desktop web browser application that provides a clean, distraction-free browsing experience. Built using Flutter and WebView2 technology, it offers a frameless window interface with hover-activated controls and customizable settings.
+Frameless Browser is a lightweight desktop web browser application specifically designed for **Wide OLED Screens** where you want to watch videos on YouTube or other streaming platforms in full screen on the side without annoying window borders and risk of OLED burn-in. Built using Flutter and WebView2 technology, it offers a frameless window interface with hover-activated controls and customizable settings.
+
+### Perfect for OLED Displays
+
+This browser is particularly valuable for users with wide OLED monitors who want to:
+- **Watch videos in full screen** without traditional window borders that can cause burn-in
+- **Eliminate static UI elements** that could permanently damage OLED pixels over time
+- **Enjoy content on the side** of their wide screen while working on other tasks
+- **Prevent burn-in risks** from persistent browser chrome and window decorations
 
 ## Features
 
