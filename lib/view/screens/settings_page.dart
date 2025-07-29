@@ -16,6 +16,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../model/settings_storage.dart';
 
@@ -183,248 +184,250 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header section
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 24,
+    return DragToResizeArea(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header section
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Text(
-                    'Browser Settings',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Browser Settings',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Settings form
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Homepage URL section
-                      const Text(
-                        'Homepage URL',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      const Text(
-                        'Set the default page that opens when you start the browser or click the home button.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      // URL input field
-                      TextFormField(
-                        controller: _urlController,
-                        validator: _validateUrl,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'https://www.example.com',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withAlpha(128),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withAlpha(13),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: Colors.white.withAlpha(51),
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: Colors.white.withAlpha(51),
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.blue,
-                              width: 2,
-                            ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 1,
-                            ),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                              color: Colors.red,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: _resetToDefault,
-                            icon: const Icon(
-                              Icons.refresh,
-                              color: Colors.white70,
-                            ),
-                            tooltip: 'Reset to default',
+                  ],
+                ),
+
+                const SizedBox(height: 32),
+
+                // Settings form
+                Expanded(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Homepage URL section
+                        const Text(
+                          'Homepage URL',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                      
-                      if (_errorMessage != null) ...[
+
                         const SizedBox(height: 8),
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.red,
+
+                        const Text(
+                          'Set the default page that opens when you start the browser or click the home button.',
+                          style: TextStyle(
+                            color: Colors.white70,
                             fontSize: 14,
                           ),
                         ),
-                      ],
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Action buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _isLoading ? null : () => context.pop(),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: BorderSide(
-                                  color: Colors.white.withAlpha(128),
-                                  width: 1,
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+
+                        const SizedBox(height: 16),
+
+                        // URL input field
+                        TextFormField(
+                          controller: _urlController,
+                          validator: _validateUrl,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'https://www.example.com',
+                            hintStyle: TextStyle(
+                              color: Colors.white.withAlpha(128),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white.withAlpha(13),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: Colors.white.withAlpha(51),
+                                width: 1,
                               ),
                             ),
-                          ),
-                          
-                          const SizedBox(width: 16),
-                          
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _saveHomepageUrl,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue.withAlpha(204),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 0,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: Colors.white.withAlpha(51),
+                                width: 1,
                               ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Save Settings',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Colors.blue,
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 1,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: _resetToDefault,
+                              icon: const Icon(
+                                Icons.refresh,
+                                color: Colors.white70,
+                              ),
+                              tooltip: 'Reset to default',
+                            ),
+                          ),
+                        ),
+
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
                             ),
                           ),
                         ],
-                      ),
-                      
-                      const Spacer(),
-                      
-                      // Help section
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.black26,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.white.withAlpha(26),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
+
+                        const SizedBox(height: 24),
+
+                        // Action buttons
+                        Row(
                           children: [
-                            Icon(
-                              Icons.tips_and_updates_outlined,
-                              color: Colors.white.withAlpha(179),
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                'Tip: Use HTTPS URLs for secure connections. Popular choices include Google, Bing, DuckDuckGo, or your favorite news site.',
-                                style: TextStyle(
-                                  color: Colors.white.withAlpha(179),
-                                  fontSize: 13,
+                              child: OutlinedButton(
+                                onPressed: _isLoading ? null : () => context.pop(),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: BorderSide(
+                                    color: Colors.white.withAlpha(128),
+                                    width: 1,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 16),
+
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _saveHomepageUrl,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue.withAlpha(204),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Save Settings',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+
+                        const Spacer(),
+
+                        // Help section
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.white.withAlpha(26),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.tips_and_updates_outlined,
+                                color: Colors.white.withAlpha(179),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Tip: Use HTTPS URLs for secure connections. Popular choices include Google, Bing, DuckDuckGo, or your favorite news site.',
+                                  style: TextStyle(
+                                    color: Colors.white.withAlpha(179),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

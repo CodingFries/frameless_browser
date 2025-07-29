@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../model/constants.dart';
 import '../../model/settings_storage.dart';
@@ -167,98 +168,100 @@ class _BrowserPageState extends State<BrowserPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Main WebView
-          InAppWebView(
-            webViewEnvironment: K.webViewEnvironment,
-            initialUrlRequest: URLRequest(
-              url: WebUri(homepageUrl ?? SettingsStorage.defaultHomepageUrl),
-            ),
-            initialSettings: settings,
-            onWebViewCreated: (controller) {
-              webViewController = controller;
-              // Load homepage URL if available
-              _loadUrlInWebView();
-            },
-            onLoadStart: (controller, url) {
-              // Update the top bar URL when navigation starts
-              if (url != null) {
-                _updateTopBarUrl(url.toString());
-              }
-            },
-            onLoadStop: (controller, url) async {
-              // Update the top bar URL when navigation completes
-              if (url != null) {
-                _updateTopBarUrl(url.toString());
-              }
-            },
-            onPermissionRequest: (controller, request) async {
-              return PermissionResponse(
-                resources: request.resources,
-                action: PermissionResponseAction.GRANT,
-              );
-            },
-            shouldOverrideUrlLoading: (controller, navigationAction) async {
-              var uri = navigationAction.request.url!;
-
-              // Handle external URLs that should be opened in system browser
-              if (![
-                "http",
-                "https",
-                "file",
-                "chrome",
-                "data",
-                "javascript",
-                "about",
-              ].contains(uri.scheme)) {
-                if (await canLaunchUrl(uri)) {
-                  // Launch the external app
-                  await launchUrl(uri);
-                  // Cancel the request in our WebView
-                  return NavigationActionPolicy.CANCEL;
+    return DragToResizeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Main WebView
+            InAppWebView(
+              webViewEnvironment: K.webViewEnvironment,
+              initialUrlRequest: URLRequest(
+                url: WebUri(homepageUrl ?? SettingsStorage.defaultHomepageUrl),
+              ),
+              initialSettings: settings,
+              onWebViewCreated: (controller) {
+                webViewController = controller;
+                // Load homepage URL if available
+                _loadUrlInWebView();
+              },
+              onLoadStart: (controller, url) {
+                // Update the top bar URL when navigation starts
+                if (url != null) {
+                  _updateTopBarUrl(url.toString());
                 }
-              }
+              },
+              onLoadStop: (controller, url) async {
+                // Update the top bar URL when navigation completes
+                if (url != null) {
+                  _updateTopBarUrl(url.toString());
+                }
+              },
+              onPermissionRequest: (controller, request) async {
+                return PermissionResponse(
+                  resources: request.resources,
+                  action: PermissionResponseAction.GRANT,
+                );
+              },
+              shouldOverrideUrlLoading: (controller, navigationAction) async {
+                var uri = navigationAction.request.url!;
 
-              return NavigationActionPolicy.ALLOW;
-            },
-            onProgressChanged: (controller, progress) {
-              setState(() {
-                this.progress = progress / 100;
-              });
-            },
-            onUpdateVisitedHistory: (controller, url, androidIsReload) {
-              // Update the top bar URL when history changes
-              if (url != null) {
-                _updateTopBarUrl(url.toString());
-              }
-            },
-          ),
+                // Handle external URLs that should be opened in system browser
+                if (![
+                  "http",
+                  "https",
+                  "file",
+                  "chrome",
+                  "data",
+                  "javascript",
+                  "about",
+                ].contains(uri.scheme)) {
+                  if (await canLaunchUrl(uri)) {
+                    // Launch the external app
+                    await launchUrl(uri);
+                    // Cancel the request in our WebView
+                    return NavigationActionPolicy.CANCEL;
+                  }
+                }
 
-          // Progress indicator
-          progress < 1.0
-              ? Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.blue.withAlpha(128),
+                return NavigationActionPolicy.ALLOW;
+              },
+              onProgressChanged: (controller, progress) {
+                setState(() {
+                  this.progress = progress / 100;
+                });
+              },
+              onUpdateVisitedHistory: (controller, url, androidIsReload) {
+                // Update the top bar URL when history changes
+                if (url != null) {
+                  _updateTopBarUrl(url.toString());
+                }
+              },
+            ),
+
+            // Progress indicator
+            progress < 1.0
+                ? Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.transparent,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.blue.withAlpha(128),
+                      ),
                     ),
-                  ),
-                )
-              : Container(),
+                  )
+                : Container(),
 
-          // Browser top bar with controls
-          BrowserTopBar(
-            key: _browserTopBarKey,
-            webViewController: webViewController,
-            onSettingsChanged: _onSettingsChanged,
-          ),
-        ],
+            // Browser top bar with controls
+            BrowserTopBar(
+              key: _browserTopBarKey,
+              webViewController: webViewController,
+              onSettingsChanged: _onSettingsChanged,
+            ),
+          ],
+        ),
       ),
     );
   }
